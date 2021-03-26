@@ -4,33 +4,31 @@ import * as THREE from 'three';
 const scene = new THREE.Scene();
 const canvas = document.querySelector('.webgl');
 
-// START Remove this test animation //
-
-const cube1 = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
-);
-
-const cube2 = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
-);
-
-const cube3 = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
-);
-
-const cubes = new THREE.Group();
-cubes.add(cube1, cube2, cube3);
-scene.add(cubes);
-
-// END Remove this test animation //
-
 const size = {
     width: window.innerWidth,
     height: window.innerHeight,
 };
+
+const cursor = {
+    x: 0,
+    y: 0,
+};
+
+window.addEventListener('mousemove', e => {
+    cursor.x = e.clientX / size.width - 0.5;
+    cursor.y = -(e.clientY / size.height - 0.5);
+});
+
+// START Remove this test animation //
+
+const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
+);
+
+scene.add(cube);
+
+// END Remove this test animation //
 
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -55,15 +53,10 @@ const animate = function () {
 
     // START Remove this test animation //
 
-    console.log(time);
-    cube1.position.y = Math.sin(time) * 2;
-    cube1.position.x = Math.cos(time) * 2;
-
-    cube2.position.z = Math.sin(time) * 2;
-    cube2.position.y = Math.cos(time) * 2;
-
-    cube3.position.x = Math.sin(time) * 2;
-    cube3.position.z = Math.cos(time) * 2;
+    camera.position.x = Math.sin(cursor.x * Math.PI) * 2;
+    camera.position.z = Math.cos(cursor.x * Math.PI) * 2;
+    camera.position.y = cursor.y * Math.PI * 2;
+    camera.lookAt(cube.position);
 
     // END Remove this test animation //
 
