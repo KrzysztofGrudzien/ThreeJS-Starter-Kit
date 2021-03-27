@@ -1,67 +1,88 @@
 import './style.css';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
+const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
-const canvas = document.querySelector('.webgl');
 
 const size = {
     width: window.innerWidth,
     height: window.innerHeight,
 };
 
-const cursor = {
-    x: 0,
-    y: 0,
-};
+// Create cube model for test
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const mesh = new THREE.Mesh(geometry, material);
+scene.add(mesh);
 
-window.addEventListener('mousemove', e => {
-    cursor.x = e.clientX / size.width - 0.5;
-    cursor.y = -(e.clientY / size.height - 0.5);
+// Update scene properties when window size changes
+window.addEventListener('resize', () => {
+    // Update sizes
+    size.width = window.innerWidth;
+    size.height = window.innerHeight;
+
+    // Update camera properties
+    camera.aspect = size.width / size.height;
+    camera.updateProjectionMatrix();
+
+    // Update renderer function
+    renderer.setSize(size.width, size.height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
-// START Remove this test animation //
+// Add and remove fullscreen window
+window.addEventListener('dblclick', () => {
+    const fullscreenElement =
+        document.fullscreenElement || document.webkitFullscreenElement;
 
-const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
-);
+    if (!fullscreenElement) {
+        if (canvas.requestFullscreen) {
+            canvas.requestFullscreen();
+        } else if (canvas.webkitRequestFullscreen) {
+            canvas.webkitRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
+    }
+});
 
-scene.add(cube);
-
-// END Remove this test animation //
-
+// Set up camera properties
 const camera = new THREE.PerspectiveCamera(
     75,
     size.width / size.height,
     0.1,
-    1000,
+    100,
 );
-
-camera.position.z = 5;
+camera.position.z = 3;
 scene.add(camera);
 
+// Add orientation of camera
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+
+// Render Canvas object in Three.js
 const renderer = new THREE.WebGLRenderer({
-    canvas,
+    canvas: canvas,
 });
 
-renderer.setSize(window.innerWidth, window.innerHeight);
+// Set up sizes and pixel ratio for window resolution
+renderer.setSize(size.width, size.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-let clock = new THREE.Clock();
+// Get time from Three.js
+const clock = new THREE.Clock();
 
-const animate = function () {
-    const time = clock.getElapsedTime();
-
-    // START Remove this test animation //
-
-    camera.position.x = Math.sin(cursor.x * Math.PI) * 2;
-    camera.position.z = Math.cos(cursor.x * Math.PI) * 2;
-    camera.position.y = cursor.y * Math.PI * 2;
-    camera.lookAt(cube.position);
-
-    // END Remove this test animation //
-
-    window.requestAnimationFrame(animate);
+// Run animation
+const animate = () => {
+    const elapsedTime = clock.getElapsedTime();
+    controls.update();
     renderer.render(scene, camera);
+    window.requestAnimationFrame(animate);
 };
 
 animate();
